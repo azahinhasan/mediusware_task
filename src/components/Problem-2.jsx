@@ -1,20 +1,43 @@
 import React, { useState, useEffect } from "react";
-import { getAllContacts, getContactsByCountry } from "../api-pages";
+import {
+  getAllContacts,
+  getContactsByCountry,
+} from "../api-pages";
 import { useParams, useNavigate } from "react-router-dom";
 
 const Problem2 = () => {
   const [data, setData] = useState([]);
   const [isChecked, setIsChecked] = useState(false);
   const [modal, setModal] = useState("");
+  const [search, setSearch] = useState({
+    text: "",
+    page: 0,
+  });
+  const [pageNumber, setPageNumber] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const { type } = useParams();
   const navigate = useNavigate();
   useEffect(() => {
+    setPageNumber(1);
     if (type === "all") {
       fetchData("all");
     } else if (type === "united-states") {
       fetchData("United States");
     }
   }, []);
+
+  //   useEffect(() => {
+  //     fetchData();
+  //     window.addEventListener("scroll", handleScroll);
+
+  //     return () => {
+  //       window.removeEventListener("scroll", handleScroll);
+  //     };
+  //   }, []);
+
+  //   useEffect(()=>{
+
+  //   },[data])
 
   const fetchData = async (type) => {
     let tempData = [];
@@ -29,25 +52,56 @@ const Problem2 = () => {
       return;
     } else if (type === "all") {
       setModal("Model-A");
-      await getAllContacts().then((res) => {
+      await getAllContacts(search.text, pageNumber).then((res) => {
         if (res.results) {
           tempData = res.results;
         }
       });
     } else {
       setModal("Model-B");
-      await getContactsByCountry(type).then((res) => {
+      await getContactsByCountry(type, search.text, pageNumber).then((res) => {
         if (res.results) {
           tempData = res.results;
         }
       });
     }
-    if (isChecked && tempData.length > 0) {
-      tempData = tempData.filter((el) => el.id % 2 === 0);
-    }
     setData(tempData);
     navigate(`/problem-2/${type.toLowerCase().replace(/\s/g, "-")}`);
   };
+
+  const searchHandler = async () => {
+    if (modal === "Model-A") {
+      await getAllContacts(search.text, pageNumber).then((res) => {
+        if (res.results) {
+          setData(res.results);
+        }
+      });
+    } else {
+      await getContactsByCountry("United States", search.text, pageNumber).then(
+        (res) => {
+          if (res.results) {
+            setData(res.results);
+          }
+        }
+      );
+    }
+  };
+
+  //   const handleScroll = async () => {
+  //     const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+
+  //     if (scrollTop + clientHeight >= scrollHeight - 5 && !isLoading) {
+  //       setPageNumber((prevPageNumber) => prevPageNumber + 1);
+  //       console.log(pageNumber);
+  //       await getAllContacts(search.text, pageNumber).then((res) => {
+  //         if (res.results) {
+  //            // console.log(res)
+  //            console.log([...data,...res.results])
+  //          setData([...data,...res.results]);
+  //         }
+  //       });
+  //     }
+  //   };
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
@@ -86,6 +140,21 @@ const Problem2 = () => {
 
         {data.length > 0 && (
           <div className="tab-content">
+            <div>
+              <input
+                type="text"
+                onChange={(e) => {
+                  setSearch({ ...search, text: e.target.value });
+                }}
+              />
+              <button
+                type="search"
+                onClick={() => searchHandler()}
+                style={{ marginLeft: "3px" }}
+              >
+                Search
+              </button>
+            </div>
             <table className="table table-striped ">
               <thead>
                 <tr>
@@ -95,14 +164,25 @@ const Problem2 = () => {
               </thead>
               <tbody>
                 {data.map((el, i) => {
-                  return (
+                  return isChecked ? (
+                    el.id % 2 === 0 && (
+                      <tr
+                        key={i}
+                        onClick={() => fetchData("next-model")}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <th scope="col">{el.country?.name}</th>
+                        <th scope="col">{el?.phone}</th>
+                      </tr>
+                    )
+                  ) : (
                     <tr
                       key={i}
                       onClick={() => fetchData("next-model")}
                       style={{ cursor: "pointer" }}
                     >
-                      <th scope="col">{el.country.name}</th>
-                      <th scope="col">{el.phone}</th>
+                      <th scope="col">{el.country?.name}</th>
+                      <th scope="col">{el?.phone}</th>
                     </tr>
                   );
                 })}

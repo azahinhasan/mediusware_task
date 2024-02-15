@@ -1,6 +1,7 @@
-const getAllContacts = async () => {
+const getAllContacts = async (search,page) => {
   try {
-    let response = await fetch(`https://contact.mediusware.com/api/contacts/`, {
+    
+    let response = await fetch(`https://contact.mediusware.com/api/contacts/?search=`+search+`&page=`+page, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -14,9 +15,9 @@ const getAllContacts = async () => {
 };
 
 
-const getContactsByCountry = async (country) => {
+const getContactsByCountry = async (country,search,page) => {
   try {
-    let response = await fetch(`https://contact.mediusware.com/api/country-contacts/`+country+'/', {
+    let response = await fetch(`https://contact.mediusware.com/api/country-contacts/`+country+'/?search='+search+`&page=`+page, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -28,5 +29,6 @@ const getContactsByCountry = async (country) => {
     console.log(err);
   }
 };
+
 
 export {getAllContacts,getContactsByCountry}
