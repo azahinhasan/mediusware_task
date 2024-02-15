@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-  getAllContacts,
-  getContactsByCountry,
-} from "../api-pages";
+import { getAllContacts, getContactsByCountry } from "../api-pages";
 import { useParams, useNavigate } from "react-router-dom";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const Problem2 = () => {
   const [data, setData] = useState([]);
@@ -13,8 +11,7 @@ const Problem2 = () => {
     text: "",
     page: 0,
   });
-  const [pageNumber, setPageNumber] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [pageNumber, setPageNumber] = useState(2);
   const { type } = useParams();
   const navigate = useNavigate();
   useEffect(() => {
@@ -26,20 +23,10 @@ const Problem2 = () => {
     }
   }, []);
 
-  //   useEffect(() => {
-  //     fetchData();
-  //     window.addEventListener("scroll", handleScroll);
 
-  //     return () => {
-  //       window.removeEventListener("scroll", handleScroll);
-  //     };
-  //   }, []);
-
-  //   useEffect(()=>{
-
-  //   },[data])
 
   const fetchData = async (type) => {
+    setPageNumber(1);
     let tempData = [];
     if (type === "next-model") {
       setModal("Model-C");
@@ -52,14 +39,14 @@ const Problem2 = () => {
       return;
     } else if (type === "all") {
       setModal("Model-A");
-      await getAllContacts(search.text, pageNumber).then((res) => {
+      await getAllContacts(search.text, 1).then((res) => {
         if (res.results) {
           tempData = res.results;
         }
       });
     } else {
       setModal("Model-B");
-      await getContactsByCountry(type, search.text, pageNumber).then((res) => {
+      await getContactsByCountry(type, search.text, 1).then((res) => {
         if (res.results) {
           tempData = res.results;
         }
@@ -69,39 +56,39 @@ const Problem2 = () => {
     navigate(`/problem-2/${type.toLowerCase().replace(/\s/g, "-")}`);
   };
 
-  const searchHandler = async () => {
+  const searchHandler = async (type) => {
+    console.log("searchHandler");
     if (modal === "Model-A") {
-      await getAllContacts(search.text, pageNumber).then((res) => {
+      await getAllContacts(
+        search.text,
+        type === "more-data" ? pageNumber : 1
+      ).then((res) => {
         if (res.results) {
-          setData(res.results);
+          type === "more-data"
+            ? setData([...data, ...res.results])
+            : setData(res.results);
         }
       });
     } else {
-      await getContactsByCountry("United States", search.text, pageNumber).then(
-        (res) => {
-          if (res.results) {
-            setData(res.results);
-          }
+      await getContactsByCountry(
+        "United States",
+        search.text,
+        type === "more-data" ? pageNumber : 1
+      ).then((res) => {
+        if (res.results) {
+          type === "more-data"
+            ? setData([...data, ...res.results])
+            : setData(res.results);
         }
-      );
+      });
     }
   };
 
-  //   const handleScroll = async () => {
-  //     const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
-
-  //     if (scrollTop + clientHeight >= scrollHeight - 5 && !isLoading) {
-  //       setPageNumber((prevPageNumber) => prevPageNumber + 1);
-  //       console.log(pageNumber);
-  //       await getAllContacts(search.text, pageNumber).then((res) => {
-  //         if (res.results) {
-  //            // console.log(res)
-  //            console.log([...data,...res.results])
-  //          setData([...data,...res.results]);
-  //         }
-  //       });
-  //     }
-  //   };
+  const fetchMoreData = async () => {
+    console.log("fetchMoreData");
+    setPageNumber((prevPageNumber) => prevPageNumber + 1);
+    searchHandler("more-data");
+  };
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
@@ -155,46 +142,56 @@ const Problem2 = () => {
                 Search
               </button>
             </div>
-            <table className="table table-striped ">
-              <thead>
-                <tr>
-                  <th scope="col">Country</th>
-                  <th scope="col">Phone</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((el, i) => {
-                  return isChecked ? (
-                    el.id % 2 === 0 && (
+            <InfiniteScroll
+              dataLength={data.length}
+              next={() => fetchMoreData()}
+              hasMore={true}
+              loader={<h4>Loading...</h4>}
+            >
+              <table className="table table-striped ">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Country</th>
+                    <th scope="col">Phone</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((el, i) => {
+                    return isChecked ? (
+                      el.id % 2 === 0 && (
+                        <tr
+                          key={i}
+                          onClick={() => fetchData("next-model")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <th scope="col">{el?.id}</th>
+                          <th scope="col">{el.country?.name}</th>
+                          <th scope="col">{el?.phone}</th>
+                        </tr>
+                      )
+                    ) : (
                       <tr
                         key={i}
                         onClick={() => fetchData("next-model")}
                         style={{ cursor: "pointer" }}
                       >
+                        <th scope="col">{el?.id}</th>
                         <th scope="col">{el.country?.name}</th>
                         <th scope="col">{el?.phone}</th>
                       </tr>
-                    )
-                  ) : (
-                    <tr
-                      key={i}
-                      onClick={() => fetchData("next-model")}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <th scope="col">{el.country?.name}</th>
-                      <th scope="col">{el?.phone}</th>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </InfiniteScroll>
           </div>
         )}
       </div>
 
       <footer
         style={{
-          position: "absolute",
+          position: "fixed",
           bottom: "0",
           left: "0",
           width: "100%",
