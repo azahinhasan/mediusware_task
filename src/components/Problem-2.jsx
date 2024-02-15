@@ -1,29 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { getAllContacts, getContactsByCountry } from "../api-pages";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Problem2 = () => {
   const [data, setData] = useState([]);
   const [isChecked, setIsChecked] = useState(false);
+  const [modal, setModal] = useState("");
+  const { type } = useParams();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (type === "all") {
+      fetchData("all");
+    } else if (type === "united-states") {
+      fetchData("United States");
+    }
+  }, []);
+
   const fetchData = async (type) => {
     let tempData = [];
-    if (type === "close") {
+    if (type === "next-model") {
+      setModal("Model-C");
       setData([]);
-      window.history.pushState({}, "", `/problem-2`);
+      return;
+    } else if (type === "close") {
+      setData([]);
+      setModal("");
+      navigate(`/problem-2`);
       return;
     } else if (type === "all") {
+      setModal("Model-A");
       await getAllContacts().then((res) => {
-        console.log(res.results);
         if (res.results) {
           tempData = res.results;
-          //setData(res.results);
         }
       });
     } else {
+      setModal("Model-B");
       await getContactsByCountry(type).then((res) => {
-        console.log(res.results);
         if (res.results) {
           tempData = res.results;
-          // setData(res.results);
         }
       });
     }
@@ -31,13 +46,9 @@ const Problem2 = () => {
       tempData = tempData.filter((el) => el.id % 2 === 0);
     }
     setData(tempData);
-    window.history.pushState(
-      {},
-      "",
-      `/problem-2/${type.toLowerCase().replace(/\s/g, "-")}`
-    );
-    //United States
+    navigate(`/problem-2/${type.toLowerCase().replace(/\s/g, "-")}`);
   };
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
       <div className="container">
@@ -49,14 +60,14 @@ const Problem2 = () => {
               className="btn btn-lg"
               type="button"
               onClick={() => fetchData("all")}
-              style={{ backgroundColor: "#46139f",color:"white"}}
+              style={{ backgroundColor: "#46139f", color: "white" }}
             >
               All Contacts
             </button>
             <button
               className="btn btn-lg"
               type="button"
-              style={{ color: "white",backgroundColor:"#ff7f50"}}
+              style={{ color: "white", backgroundColor: "#ff7f50" }}
               onClick={() => fetchData("United States")}
             >
               US Contacts
@@ -64,13 +75,15 @@ const Problem2 = () => {
             <button
               className="btn btn-lg"
               type="button"
-              style={{ color: "#46139f",border:"#46139f 2px solid"}}
+              style={{ color: "#46139f", border: "#46139f 2px solid" }}
               onClick={() => fetchData("close")}
             >
               Close
             </button>
           </div>
+          <h2 style={{ textAlign: "center", margin: "5px" }}>{modal}</h2>
         </div>
+
         {data.length > 0 && (
           <div className="tab-content">
             <table className="table table-striped ">
@@ -83,7 +96,11 @@ const Problem2 = () => {
               <tbody>
                 {data.map((el, i) => {
                   return (
-                    <tr key={i}>
+                    <tr
+                      key={i}
+                      onClick={() => fetchData("next-model")}
+                      style={{ cursor: "pointer" }}
+                    >
                       <th scope="col">{el.country.name}</th>
                       <th scope="col">{el.phone}</th>
                     </tr>
@@ -107,7 +124,6 @@ const Problem2 = () => {
           textAlign: "left",
           paddingLeft: "30px",
           lineHeight: "60px",
-
         }}
       >
         <input
