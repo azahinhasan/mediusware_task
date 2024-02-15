@@ -26,6 +26,9 @@ const Problem1 = () => {
       name: e.target.elements.name.value,
       status: e.target.elements.status.value.toLowerCase().replace(/\s+/g, ""),
     };
+    if (Object.values(newData).filter((el) => !el).length>0) {
+      return;
+    }
     setData([...data, newData]);
     setShow([...data, newData]);
   };
@@ -69,7 +72,6 @@ const Problem1 = () => {
                 className={`nav-link ${show === "all" && "active"}`}
                 type="button"
                 onClick={() => handleClick("all")}
-              
               >
                 All
               </button>
@@ -115,8 +117,6 @@ const Problem1 = () => {
           </div>
         </div>
       </div>
-
-
     </div>
   );
 };
