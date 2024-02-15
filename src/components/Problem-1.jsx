@@ -69,6 +69,7 @@ const Problem1 = () => {
                 className={`nav-link ${show === "all" && "active"}`}
                 type="button"
                 onClick={() => handleClick("all")}
+              
               >
                 All
               </button>
@@ -115,7 +116,7 @@ const Problem1 = () => {
         </div>
       </div>
 
-      
+
     </div>
   );
 };

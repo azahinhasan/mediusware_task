@@ -6,7 +6,11 @@ const Problem2 = () => {
   const [isChecked, setIsChecked] = useState(false);
   const fetchData = async (type) => {
     let tempData = [];
-    if (type === "all") {
+    if (type === "close") {
+      setData([]);
+      window.history.pushState({}, "", `/problem-2`);
+      return;
+    } else if (type === "all") {
       await getAllContacts().then((res) => {
         console.log(res.results);
         if (res.results) {
@@ -27,6 +31,11 @@ const Problem2 = () => {
       tempData = tempData.filter((el) => el.id % 2 === 0);
     }
     setData(tempData);
+    window.history.pushState(
+      {},
+      "",
+      `/problem-2/${type.toLowerCase().replace(/\s/g, "-")}`
+    );
     //United States
   };
   return (
@@ -37,23 +46,26 @@ const Problem2 = () => {
 
           <div className="d-flex justify-content-center gap-3">
             <button
-              className="btn btn-lg btn-outline-primary"
+              className="btn btn-lg"
               type="button"
               onClick={() => fetchData("all")}
+              style={{ backgroundColor: "#46139f",color:"white"}}
             >
               All Contacts
             </button>
             <button
-              className="btn btn-lg btn-outline-warning"
+              className="btn btn-lg"
               type="button"
+              style={{ color: "white",backgroundColor:"#ff7f50"}}
               onClick={() => fetchData("United States")}
             >
               US Contacts
             </button>
             <button
-              className="btn btn-lg btn-outline-danger"
+              className="btn btn-lg"
               type="button"
-              onClick={() => setData([])}
+              style={{ color: "#46139f",border:"#46139f 2px solid"}}
+              onClick={() => fetchData("close")}
             >
               Close
             </button>
@@ -93,8 +105,9 @@ const Problem2 = () => {
           backgroundColor: "#333",
           color: "white",
           textAlign: "left",
-          paddingLeft: "10px",
+          paddingLeft: "30px",
           lineHeight: "60px",
+
         }}
       >
         <input
