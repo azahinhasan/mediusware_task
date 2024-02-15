@@ -15,7 +15,6 @@ const Problem2 = () => {
   const { type } = useParams();
   const navigate = useNavigate();
   useEffect(() => {
-    setPageNumber(1);
     if (type === "all") {
       fetchData("all");
     } else if (type === "united-states") {
@@ -26,7 +25,7 @@ const Problem2 = () => {
 
 
   const fetchData = async (type) => {
-    setPageNumber(1);
+    setPageNumber(2);
     let tempData = [];
     if (type === "next-model") {
       setModal("Model-C");
