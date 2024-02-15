@@ -7,12 +7,14 @@ const Problem1 = () => {
   const handleClick = (val) => {
     switch (val) {
       case "all":
-        let temp={
-            active:data.filter((el) => el.status === "active"),
-            completed:data.filter((el) => el.status === "completed"),
-            other:data.filter((el) => el.status !== "completed"&&el.status !== "active"),
-        }
-        setShow([...temp.active,...temp.completed,...temp.other]);
+        let temp = {
+          active: data.filter((el) => el.status === "active"),
+          completed: data.filter((el) => el.status === "completed"),
+          other: data.filter(
+            (el) => el.status !== "completed" && el.status !== "active"
+          ),
+        };
+        setShow([...temp.active, ...temp.completed, ...temp.other]);
         break;
       default:
         setShow(data.filter((el) => el.status === val));
@@ -22,7 +24,7 @@ const Problem1 = () => {
     e.preventDefault();
     const newData = {
       name: e.target.elements.name.value,
-      status: e.target.elements.status.value.toLowerCase().replace(/\s+/g, ''),
+      status: e.target.elements.status.value.toLowerCase().replace(/\s+/g, ""),
     };
     setData([...data, newData]);
     setShow([...data, newData]);
@@ -90,27 +92,30 @@ const Problem1 = () => {
               </button>
             </li>
           </ul>
-          <div className="tab-content"></div>
-          <table className="table table-striped ">
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {show.map((el) => {
-                return (
-                  <tr>
-                    <th scope="col">{el.name}</th>
-                    <th scope="col">{el.status}</th>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="tab-content">
+            <table className="table table-striped ">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {show.map((el) => {
+                  return (
+                    <tr>
+                      <th scope="col">{el.name}</th>
+                      <th scope="col">{el.status}</th>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      
     </div>
   );
 };
